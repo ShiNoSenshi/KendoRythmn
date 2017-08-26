@@ -11,9 +11,11 @@ public class PlayerController : MonoBehaviour {
     private Sprite doSprite;
     private float time;
     private bool attacked;
+    private RythmnController rythmnController;
 
     private void Start()
     {
+        rythmnController = GameObject.Find("RythmnController").GetComponent<RythmnController>();
         LoadSprites();
     }
 
@@ -53,7 +55,10 @@ public class PlayerController : MonoBehaviour {
         {
             attacked = WaitForUserInput();
             if (attacked)
+            {
+                rythmnController.PlayerAttack(currentStatus);
                 time = 0;
+            }
         }
     }
 
@@ -67,21 +72,23 @@ public class PlayerController : MonoBehaviour {
                 case Attack.Men:
                     ((SpriteRenderer)gameObject.GetComponent<SpriteRenderer>()).sprite = menSprite;
                     currentStatus = Attack.Men;
+                    updated = true;
                     break;
                 case Attack.Kote:
                     ((SpriteRenderer)gameObject.GetComponent<SpriteRenderer>()).sprite = koteSprite;
                     currentStatus = Attack.Kote;
+                    updated = true;
                     break;
                 case Attack.Do:
                     ((SpriteRenderer)gameObject.GetComponent<SpriteRenderer>()).sprite = doSprite;
                     currentStatus = Attack.Do;
+                    updated = true;
                     break;
                 default:
                     ((SpriteRenderer)gameObject.GetComponent<SpriteRenderer>()).sprite = idleSprite;
                     currentStatus = Attack.Idle;
                     break;
             }
-            updated = true;
         }
         return updated;
     }

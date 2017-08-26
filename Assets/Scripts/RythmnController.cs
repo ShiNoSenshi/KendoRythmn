@@ -5,14 +5,18 @@ using UnityEngine;
 
 public class RythmnController : MonoBehaviour {
     public GameObject spawnPosition;
+    public GameObject hitPosition;
     private float time;
     private IEnumerator<Attack> keys;
     private readonly float DELTA_BETWEEN_KEYS = 0.05f;
     private List<GameObject> keyObjects = new List<GameObject>();
     private List<GameObject> enemyObjects = new List<GameObject>();
+    private List<Attack> attacks = new List<Attack>();
+    private ScoreController scoreController;
 
     private void Start()
     {
+        scoreController = GameObject.Find("ScoreController").GetComponent<ScoreController>();
         keys = GetKey();
     }
 
@@ -41,6 +45,8 @@ public class RythmnController : MonoBehaviour {
 
             Destroy(enemyObjects[0]);
             enemyObjects.Remove(enemyObjects[0]);
+
+            attacks.Remove(attacks[0]);
         }
     }
 
@@ -65,6 +71,41 @@ public class RythmnController : MonoBehaviour {
                 var enemy = EnemyFactory.instance.GenerateObject(ComputeEnemyAttack(key), spawnPosition.transform.position + new Vector3(0,2), Vector3.one, true);
                 if (enemy != null)
                     enemyObjects.Add(enemy);
+                attacks.Add(key);
+            }
+        }
+    }
+
+    internal void PlayerAttack(Attack playerAttack)
+    {
+        Attack nextAttack;
+        Vector3 position;
+        NextNeededAttack(out nextAttack, out position);
+        if(playerAttack != nextAttack)
+        {
+            scoreController.WrongAttack();
+        }
+        else
+        {
+            Vector3 distance = hitPosition.transform.position - position;
+            scoreController.RightAttack(distance);
+        }
+    }
+
+    private void NextNeededAttack(out Attack nextAttack, out Vector3 position)
+    {
+        nextAttack = Attack.Idle;
+        position = default(Vector3);
+        if(keyObjects.Count > 0)
+        {
+            foreach(var keyObject in keyObjects)
+            { 
+                if(keyObject.transform.position.x > (hitPosition.transform.position.x - 1))
+                {
+                    position = keyObject.transform.position;
+                    nextAttack = attacks[keyObjects.IndexOf(keyObject)];
+                    break;
+                }
             }
         }
     }
